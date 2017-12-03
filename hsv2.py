@@ -31,7 +31,7 @@ def cv_load_image(in_, type_='path'):
         img_nparr = np.fromstring(cv_session.get(in_).content, np.uint8)
         img = cv2.imdecode(img_nparr, cv2.IMREAD_COLOR)
     else:
-        img = cv2.imread(in_, cv2.IMREAD_COLOR | cv2.IMREAD_IGNORE_ORIENTATION)
+        img = cv2.imread(in_, cv2.IMREAD_COLOR)
     return img
     
 def transform_img(img_name, bbox):
@@ -67,15 +67,13 @@ def transform_img(img_name, bbox):
 
 def get_data(mysql, src):
     sql = '''
-        select test.src_id src_id, obj.x_pixel xmin, obj.y_pixel ymin, obj.width_pixel width, obj.height_pixel height,
-        concat('http://192.168.1.23:8082/', img.fid) as url
-        from internal_website.makeup_comment2shop test
-        inner join internal_website.image img 
-        on img.id = test.img_id
-        inner join internal_website.object obj
+        select obj.x_pixel xmin, obj.y_pixel ymin, obj.width_pixel width, obj.height_pixel height,
+        img.path as path, img.id as img_id
+        from dp_image.image img
+        inner join dp_image.object obj
         on obj.img_id = img.id
-        where test.src_type = {}
-        '''.format(src)
+        where img.src_src = 'dp_customer2shop' and img.split_type = 'val' limit 20000
+        '''
     datas = list(mysql.select(sql))
     print len(datas)
     return datas
@@ -118,9 +116,9 @@ if __name__ == '__main__':
         hists = []
         itemids = []
         for data in data_batch:
-            itemid = data['src_id']
+            itemid = data['img_id']
             itemids.append(itemid)
-            path = data['url']
+            path = data['path']
             xmin = int(data['xmin'])
             ymin = int(data['ymin'])
             width = int(data['width'])
@@ -159,6 +157,6 @@ if __name__ == '__main__':
         #print w1.shape
         #vis_square(w1.transpose(0,2,3,1))
         
-    json.dump({'fea':fea_list, 'src_id':src_id_list}, \
-        open('/data/data/shenyaxin/fea/color_hsv_1201_{}.json'.format(1), 'w'))
+    json.dump({'fea':fea_list, 'id':src_id_list}, \
+        open('/data/data/shenyaxin/fea/color/cloth_hsv_pool_{}.json'.format(0), 'w'))
     print len(src_id_list)
