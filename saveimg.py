@@ -86,10 +86,11 @@ def get_data(mysql, src):
         from dp_image.image img
         inner join dp_image.object obj
         on obj.img_id = img.id
-        where img.src_src = 'dp_customer2shop' and img.split_type = 'test' limit 800
+        where img.src_src = 'dp_customer2shop' and img.split_type = 'val' limit 20000
         '''
 
     datas = list(mysql.select(sql))
+    datas = datas[16000:]
     print len(datas)
     return datas
 
@@ -145,7 +146,7 @@ if __name__ == '__main__':
             #exit()
             oo = oo[:,:,(2,1,0)]
             #print oo.shape
-            misc.imsave('/data/data/shenyaxin/fea/color/imgq/%d.jpg'%(img_id),oo)
+            misc.imsave('/data/data/shenyaxin/fea/color/imgdb3/%d.jpg'%(img_id),oo)
          
             #hists.append(hist)'
             #imgs.append(img)
