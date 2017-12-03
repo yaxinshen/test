@@ -97,8 +97,8 @@ if __name__=='__main__':
     
     fea_q, id_q = get_fea_hsv('/data/data/shenyaxin/fea/color_hsv_hist_1201_1.json')
     fea_db, id_db = get_fea_hsv('/data/data/shenyaxin/fea/color_hsv_hist_1201_0.json')
-    fea_q2, id_q2 = get_fea('/data/data/shenyaxin/fea/color_fea_27_sv_om_1.json')
-    fea_db2, id_db2 = get_fea('/data/data/shenyaxin/fea/color_fea_27_sv_om_0.json')
+    fea_q2, id_q2 = get_fea('/data/data/shenyaxin/fea/color_fea_select_1.json')
+    fea_db2, id_db2 = get_fea('/data/data/shenyaxin/fea/color_fea_select_0.json')
     #fea_q3, _ = get_fea('/data/data/shenyaxin/fea/res101_fea_iter18W_1.json')
     #fea_db3, _ = get_fea('/data/data/shenyaxin/fea/res101_fea_iter18W_0.json')
     
@@ -117,9 +117,9 @@ if __name__=='__main__':
         for ind, kk in enumerate(k_cand):
             if id in res_id[:kk]:
                 re[ind] += 1
-        plot_id = [id]
-        plot_id.extend(res_id[:9])
-        show_img(mysql, plot_id)
+        #plot_id = [id]
+        #plot_id.extend(res_id[:9])
+        #show_img(mysql, plot_id)
         if idx % 1000 == 0:
             print '---------------{} imgs done----------------'.format(idx)
             print re

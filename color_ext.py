@@ -102,7 +102,7 @@ if __name__ == '__main__':
     net = caffe.Net(net_file, caffe_model, caffe.TEST)
     mysql = MysqlOperator()
     #shop_mete = get_data(mysql, 0)
-    datas = get_data(mysql, 0)
+    datas = get_data(mysql, 1)
     src_id_list = []
     fea_list = []
     batch_size = 32
@@ -133,7 +133,8 @@ if __name__ == '__main__':
         net.blobs["data"].data[...] =  imgs
         output = net.forward()
         fea = net.blobs['pool1x'].data.copy()
-        fea = fea[:,48:,:,:]
+        #print fea.shape
+        fea = fea[:,[51,55,56,57,58,59,60,62,65,66,68,69,70,71,72,73,76,77,78,81,82,83,84,85,87,89,91,94,95]]
         #print fea.shape
         
         fea = fea.reshape(bs, -1)
@@ -143,7 +144,7 @@ if __name__ == '__main__':
         fea_list.extend(fea.tolist())
         curlen = len(fea_list)
         if curlen%100 == 0:
-            print 'now: ', curlen
+            print 'now: ', curlen, fea.shape
             
         
         #w1 = net.params["conv1"][0].data
@@ -151,5 +152,5 @@ if __name__ == '__main__':
         #vis_square(w1.transpose(0,2,3,1))
         
     json.dump({'fea':fea_list, 'src_id':src_id_list}, \
-        open('/data/data/shenyaxin/fea/color_fea_27_sv_om_{}.json'.format(0), 'w'))
+        open('/data/data/shenyaxin/fea/color_fea_select_{}.json'.format(1), 'w'))
     print len(src_id_list)

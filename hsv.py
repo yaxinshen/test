@@ -31,7 +31,7 @@ def cv_load_image(in_, type_='path'):
         img_nparr = np.fromstring(cv_session.get(in_).content, np.uint8)
         img = cv2.imdecode(img_nparr, cv2.IMREAD_COLOR)
     else:
-        img = cv2.imread(in_, cv2.IMREAD_COLOR | cv2.IMREAD_IGNORE_ORIENTATION)
+        img = cv2.imread(in_, cv2.IMREAD_COLOR)
     return img
     
 def transform_img(img_name, bbox):
@@ -40,7 +40,7 @@ def transform_img(img_name, bbox):
     else:
         type_ = 'path'
     img = cv_load_image(img_name, type_)#.astype(np.float32)
-    plt.subplot(236), plt.imshow(img[:,:,(2,1,0)])
+    #plt.subplot(236), plt.imshow(img[:,:,(2,1,0)])
     # print bbox
     # print len(bbox)
     # raise
@@ -67,11 +67,12 @@ def transform_img(img_name, bbox):
     cv2.calcHist([hsv], [1], None, [50], [0, 256]), \
     cv2.calcHist([hsv], [2], None, [50], [0, 256])]
     hist = np.array(hist)
-    #x = np.arange(50) + 0.5
+    x = np.arange(50) + 0.5
     #plt.subplot(231), plt.bar(x, hist[0])
     #plt.subplot(232), plt.bar(x, hist[1])
     #plt.subplot(233), plt.bar(x, hist[2])
-    #plt.show()
+    #plt.bar(x, hist[0])
+    #plt.savefig('img/hist.jpg')
     #hsv = hsv.transpose((2, 0, 1))
     #mean = np.array([104.0, 117.0, 123.0], dtype=np.float32).reshape((1, 1, -1))
     #img -= mean
@@ -80,15 +81,14 @@ def transform_img(img_name, bbox):
 
 def get_data(mysql, src):
     sql = '''
-        select test.src_id src_id, obj.x_pixel xmin, obj.y_pixel ymin, obj.width_pixel width, obj.height_pixel height,
-        concat('http://192.168.1.23:8082/', img.fid) as url
-        from internal_website.makeup_comment2shop test
-        inner join internal_website.image img 
-        on img.id = test.img_id
-        inner join internal_website.object obj
+        select obj.x_pixel xmin, obj.y_pixel ymin, obj.width_pixel width, obj.height_pixel height,
+        img.path as path, img.id as img_id
+        from dp_image.image img
+        inner join dp_image.object obj
         on obj.img_id = img.id
-        where test.src_type = {}
-        '''.format(src)
+        where img.src_src = 'dp_customer2shop' and img.split_type = 'test' limit 5000
+        '''
+
     datas = list(mysql.select(sql))
     print len(datas)
     return datas
@@ -109,17 +109,18 @@ def vis_square(data):
     plt.show()
         
 if __name__ == '__main__':
-    caffe.set_device(0)
-    caffe.set_mode_gpu()
+    #caffe.set_device(0)
+    #caffe.set_mode_gpu()
 
-    net_file = '/home/shenyaxin/color/deploy.prototxt'
-    caffe_model = '/core1/data/home/liuhuawei/tools/models/bvlc_reference_caffenet.caffemodel'
-    net = caffe.Net(net_file, caffe_model, caffe.TEST)
+    #net_file = '/home/shenyaxin/color/deploy.prototxt'
+    #caffe_model = '/core1/data/home/liuhuawei/tools/models/bvlc_reference_caffenet.caffemodel'
+    #net = caffe.Net(net_file, caffe_model, caffe.TEST)
     mysql = MysqlOperator()
     #shop_mete = get_data(mysql, 0)
     datas = get_data(mysql,0)
-    src_id_list = []
+    #src_id_list = []
     fea_list = []
+    img_id_list = []
     batch_size = 32
     bs = 32
     for i in range(0, len(datas), batch_size):
@@ -129,18 +130,19 @@ if __name__ == '__main__':
         imgs = []
         hsvs = []
         hists = []
-        itemids = []
+        img_ids = []
         for data in data_batch:
-            itemid = data['src_id']
-            itemids.append(itemid)
-            path = data['url']
+            img_id = data['img_id']
+            img_ids.append(img_id)
+            path = data['path']
             xmin = int(data['xmin'])
             ymin = int(data['ymin'])
             width = int(data['width'])
             height = int(data['height'])
             bbox = [xmin, ymin, xmin+width, ymin+height]
             _,_,hist = transform_img(path, bbox)
-            #print hist.shape
+            #print hist[0].max(),hist[1].max(),hist[2].max()
+            #exit()
             hists.append(hist)
             #imgs.append(img)
             #hsvs.append(hsv)
@@ -159,7 +161,8 @@ if __name__ == '__main__':
         fea = fea.reshape(bs, -1)
         #print fea.shape
         #exit()
-        src_id_list.extend(itemids)
+        #src_id_list.extend(itemids)
+        img_id_list.extend(img_ids)
         fea_list.extend(fea.tolist())
         curlen = len(fea_list)
         if curlen%100 == 0:
@@ -170,6 +173,6 @@ if __name__ == '__main__':
         #print w1.shape
         #vis_square(w1.transpose(0,2,3,1))
         
-    json.dump({'fea':fea_list, 'src_id':src_id_list}, \
-        open('/data/data/shenyaxin/fea/color_hsv_hist_1201_{}.json'.format(0), 'w'))
-    print len(src_id_list)
+    json.dump({'fea':fea_list, 'id':img_id_list}, \
+        open('/data/data/shenyaxin/fea/color/cloth_hsv_hist_{}.json'.format(1), 'w'))
+    print len(img_id_list)

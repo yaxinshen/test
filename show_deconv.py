@@ -139,10 +139,13 @@ if __name__ == '__main__':
         #plt.axis('off')
         #plt.show()
         #plt.savefig('1.png')
-        #misc.imsave('1.png',imgs[0].transpose((1,2,0)))
-        #misc.imsave('2.png',img_t[0].transpose((1,2,0)))
-        with open('1.txt','w') as f:
-            f.write(str(imgs[0]))
-        with open('2.txt','w') as f2:
-            f2.write(str(img_t[0]))
-        exit()
+        imga = imgs[0,(1,2,0),:,:].transpose((1,2,0)).astype(int)
+        imgb = img_t[0,(1,2,0),:,:].transpose((1,2,0)).astype(int)
+        misc.imsave('%d1.png'%(i),imga)
+        misc.imsave('%d2.png'%(i),imgb)
+        #with open('1.txt','w') as f:
+        #    f.write(str(imgs[0]))
+        #with open('2.txt','w') as f2:
+        #    f2.write(str(img_t[0]))
+        if i == 5:
+            exit()

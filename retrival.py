@@ -39,11 +39,13 @@ def get_fea(file_name):
 def get_fea_hsv(file_name):
     data = json.load(open(file_name, 'r'))
     fea = data['fea']
-    src_id = data['src_id']
+    src_id = data['id']
     fea = np.array(fea, dtype = 'float32')
-    sv = fea[:,50:]
+    #sv = fea[:,50:]
     #sv = fea
-    sv = normalize(sv)
+    sv = normalize(fea)
+    print sv.max()
+    sv[sv < 0.1] = 0
     return sv, src_id
 
 def show_img(mysql, src_ids):
@@ -91,15 +93,16 @@ def show_img(mysql, src_ids):
 
 if __name__=='__main__':
     mysql = MysqlOperator()
-    fea_q, id_q = get_fea_hsv('/data/data/shenyaxin/fea/color_hsv_hist_1.json')
-    fea_db, id_db = get_fea_hsv('/data/data/shenyaxin/fea/color_hsv_hist_0.json')
-    fea_q2, id_q2 = get_fea('/data/data/shenyaxin/fea/color_fea_27_1.json')
-    fea_db2, id_db2 = get_fea('/data/data/shenyaxin/fea/color_fea_27_0.json')
-    fea_q3, _ = get_fea('/data/data/shenyaxin/fea/res101_fea_iter18W_1.json')
-    fea_db3, _ = get_fea('/data/data/shenyaxin/fea/res101_fea_iter18W_0.json')
+    fea_q, id_q = get_fea_hsv('/data/data/shenyaxin/fea/color/cloth_hsv_hist_1.json')
+    fea_db, id_db = get_fea_hsv('/data/data/shenyaxin/fea/color/cloth_hsv_hist_0.json')
+    exit()
+    fea_q2, id_q2 = get_fea('/data/data/shenyaxin/fea/color/cloth_fea_48_1.json')
+    fea_db2, id_db2 = get_fea('/data/data/shenyaxin/fea/color/cloth_fea_48_0.json')
+    #fea_q3, _ = get_fea('/data/data/shenyaxin/fea/res101_fea_iter18W_1.json')
+    #fea_db3, _ = get_fea('/data/data/shenyaxin/fea/res101_fea_iter18W_0.json')
     
-    fea_q = np.concatenate((0.1*fea_q2, 0.3*fea_q, fea_q3), axis = 1)
-    fea_db = np.concatenate((0.1*fea_db2, 0.3*fea_db, fea_db3), axis = 1)
+    #fea_q = np.concatenate((0.1*fea_q2, 0.3*fea_q, fea_q3), axis = 1)
+    #fea_db = np.concatenate((0.1*fea_db2, 0.3*fea_db, fea_db3), axis = 1)
     knn = KNNSPEED(features = fea_db, titles = id_db)
     #id_q = id_q[3000:]
     #fea_q = fea_q[3000:]
