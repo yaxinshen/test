@@ -70,7 +70,7 @@ def get_data(mysql, src):
         from dp_image.image img
         inner join dp_image.object obj
         on obj.img_id = img.id
-        where img.src_src = 'dp_customer2shop' and img.split_type = 'val' limit 20000
+        where img.src_src = 'dp_customer2shop' and img.split_type = 'test' limit 5000
         '''
     datas = list(mysql.select(sql))
     print len(datas)
@@ -132,7 +132,7 @@ if __name__ == '__main__':
         output = net.forward()
         fea = net.blobs['pool1x'].data.copy()
         #print fea.shape
-        fea = fea[:,[51,55,56,57,58,59,60,62,65,66,68,69,70,71,72,73,76,77,78,81,82,83,84,85,87,89,91,94,95]]
+        fea = fea[:,[51,56,57,65,73,76,83,84,85,89,94]]
         #print fea.shape
         
         fea = fea.reshape(bs, -1)
@@ -150,5 +150,5 @@ if __name__ == '__main__':
         #vis_square(w1.transpose(0,2,3,1))
         
     json.dump({'fea':fea_list, 'id':src_id_list}, \
-        open('/data/data/shenyaxin/fea/color/cloth_fea_select_{}.json'.format(0), 'w'))
+        open('/data/data/shenyaxin/fea/color/cloth_fea_11f_{}.json'.format(1), 'w'))
     print len(src_id_list)
